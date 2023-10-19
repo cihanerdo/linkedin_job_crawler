@@ -52,13 +52,13 @@ def job_list_to_csv(job_title, geo_id):
                 print("Veri çekme başarısız oldu. İşlem sonlandırılıyor.")
                 break
 
-        df.to_csv("jobsearch_data.csv")
+        df.to_csv("jobsearch_data.csv", index=False)
         return df
     except Exception as e:
         print("Hata oluştu:", str(e))
         df.columns = ["job_id", "job_title", "company_name", "location"]
         df['job_id'] = df['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
-        df.to_csv("jobsearch_data.csv")
+        df.to_csv("jobsearch_data.csv", index=False)
         print("Veri Bitti")
         return df
 
