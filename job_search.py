@@ -8,12 +8,11 @@ result_json = fetch_data(url)
 df = job_list_to_csv("Data Analyst", "İsviçre")
 
 
+url = generate_url("Data Engineer", "Amerika Birleşik Devletleri")
 
+result_json = fetch_data(url)
 
-
-
-
-
+usa_df = job_list_to_csv("Data Engineer", "Amerika Birleşik Devletleri")
 
 
 

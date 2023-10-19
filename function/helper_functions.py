@@ -6,6 +6,9 @@ import time
 import random
 from config.conf import *
 import os
+from datetime import datetime
+
+
 
 ####### jobsearch ############################################
 def generate_url(job_title="Data Engineer", geo_id="Türkiye", start_count=0):
@@ -53,8 +56,11 @@ def job_list_to_csv(job_title, geo_id):
             else:
                 print("Veri çekme başarısız oldu. İşlem sonlandırılıyor.")
                 break
+        os.makedirs("outputs")
+        today = datetime.today().strftime("%d-%m-%y")
+        file_name = f"outputs/job_search_data.{today}.csv"
         # csv dosyası oluşturuldu
-        df.to_csv("job_search_data.csv", index=False)
+        df.to_csv(file_name, index=False)
         return df
     except Exception as e:
         print("Hata oluştu:", str(e))
@@ -63,8 +69,11 @@ def job_list_to_csv(job_title, geo_id):
         df['job_id'] = df['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
         # outputs klasörü oluştur.
         os.makedirs("outputs")
+
+        today = datetime.today().strftime("%d-%m-%y")
+        file_name = f"outputs/job_search_data.{today}.csv"
         # csv dosyası oluşturuldu
-        df.to_csv("outputs/job_search_data.csv", index=False)
+        df.to_csv(file_name, index=False)
         print("Veri Bitti")
         return df
 
@@ -91,19 +100,23 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
     Example:
         data, included = fetch_job_details_json()
     """
-    response = requests.get(
+    job_detail_response = requests.get(
         f'https://www.linkedin.com/voyager/api/jobs/jobPostings/{job_id}',
         cookies=cookies,
         headers=headers,
     )
 
-    response.raise_for_status()
+    job_detail_response.raise_for_status()
 
-    return response.json()["data"], response.json()["included"]
+    return job_detail_response.json()["data"], job_detail_response.json()["included"]
 def get_job_detail_dataframe(job_id):
 
     job_json, included_json = fetch_job_details_json(job_id=job_id)
 
+    try:
+        job_id = job_json["entityUrn"]
+    except:
+        job_id = None
     try:
         job_description = job_json["description"]["text"]
     except:
@@ -168,7 +181,10 @@ def get_job_detail_dataframe(job_id):
     except:
         is_remote = None
 
-    job_dict = {"job_description":[job_description], "job_apply_count":[job_apply_count],
+    job_id = job_id.replace("urn:li:fs_normalized_jobPosting:", "")
+  # workplaceTypes bunu çözebiliyor muyuz?
+
+    job_dict = {"job_id": [job_id],"job_description":[job_description], "job_apply_count":[job_apply_count],
               "expire_date":[expire_date], "employment_status":[employment_status],
               "experience_level":[experience_level], "industries":[industries],
               "job_functions":[job_functions], "location":[location],
@@ -179,10 +195,12 @@ def get_job_detail_dataframe(job_id):
     job_detail_dataframe = pd.DataFrame(job_dict)
 
     return job_detail_dataframe
-def make_jobdetails_list(DataFrame):
+def job_details_to_csv(DataFrame):
+    job_detail_df = pd.DataFrame()
 
     counter = 0
-# DataFrame'in satırlarında dolaşmak için tqdm kullanımı
+
+    # df ismindeki DataFrame'in satırlarında dolaşmak için tqdm kullanımı
     for _, row in tqdm(DataFrame.iterrows(), total=len(DataFrame)):
         job_id = row["job_id"]
 
@@ -197,16 +215,21 @@ def make_jobdetails_list(DataFrame):
 
         counter += 1
 
-        # Her 50 işlemde Excel dosyasına kayıt oluştur.
+        # İlk 50 işlemde Excel dosyası oluştur. Sonrasında üstüne kaydet.
         # Oluşturamazsan 10 saniye dur.
         if counter == 50:
             try:
-                job_detail_df.to_csv("jobdetail.csv")
+
+                os.makedirs("outputs")
+                today = datetime.today().strftime("%d-%m-%y")
+                file_name = f"outputs/job_details_data.{today}.csv"
+                job_detail_df.to_csv(file_name, index=False)
                 print("Excel dosyası oluşturuldu")
             except Exception as e:
-                print(e, response.status_code)
+                print(e, job_detail_response.status_code)
                 time.sleep(10)
             counter = 0
+
     return job_detail_df
 ########################################
 
