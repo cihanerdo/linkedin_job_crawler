@@ -5,7 +5,7 @@ from tqdm import tqdm
 import time
 import random
 from config.conf import *
-
+import os
 
 ####### jobsearch ############################################
 def generate_url(job_title="Data Engineer", geo_id="Türkiye", start_count=0):
@@ -43,22 +43,28 @@ def job_list_to_csv(job_title, geo_id):
             url = generate_url(job_title, geo_id, start_count=start_count)
             result_json = fetch_data(url)
             if result_json is not None:  # Veri başarıyla çekildiyse işlem yap
+                # yeni gelen veri eski verinin üstüne ekleniyor.
                 df2 = fetch_job_ids(result_json)
                 df = pd.concat([df, df2], ignore_index=True)
+                # linkedin sayfa mantığı 0'dan başlayıp 25'er artmasından kaynaklı.
                 start_count += 25
                 if len(df2) == 0:
                     break
             else:
                 print("Veri çekme başarısız oldu. İşlem sonlandırılıyor.")
                 break
-
-        df.to_csv("jobsearch_data.csv", index=False)
+        # csv dosyası oluşturuldu
+        df.to_csv("job_search_data.csv", index=False)
         return df
     except Exception as e:
         print("Hata oluştu:", str(e))
+        # sütun isimleri değişti, jod_id tek başına alındı
         df.columns = ["job_id", "job_title", "company_name", "location"]
         df['job_id'] = df['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
-        df.to_csv("jobsearch_data.csv", index=False)
+        # outputs klasörü oluştur.
+        os.makedirs("outputs")
+        # csv dosyası oluşturuldu
+        df.to_csv("outputs/job_search_data.csv", index=False)
         print("Veri Bitti")
         return df
 
