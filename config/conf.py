@@ -48,7 +48,7 @@ headers = {
     'x-restli-protocol-version': '2.0.0',
 }
 
-geo_id_dict = {"Türkiye": "102105699", "Almanya": "101282230", "İsviçre": "106693272", "Amerika Birleşik Devletleri": "103644278",
+geoid_dict = {"Türkiye": "102105699", "Almanya": "101282230", "İsviçre": "106693272", "Amerika Birleşik Devletleri": "103644278",
 "Fransa": "105015875", "Kanada": "101174742", "Danimarka": "104514075", "Birleşik Krallık": "101165590",
 "Norveç": "103819153", "İsveç": "105117694", "Polonya": "105072130", "Hollanda": "102890719", "İtalya": "103350119",
 "Japonya": "101355337", "Macaristan": "100288700", "Güney Afrika": "104035573", "Arjantin": "100446943",

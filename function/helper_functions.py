@@ -7,75 +7,126 @@ import random
 from config.conf import *
 import os
 from datetime import datetime
+import logging
+
+
+logging.basicConfig(filename='log.log', level=logging.WARNING, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 
 ####### jobsearch ############################################
-def generate_url(job_title="Data Engineer", geo_id="Türkiye", start_count=0):
+def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
     job_title = job_title_dict[job_title]
-    geo_id = geo_id_dict[geo_id]
+    location = geoid_dict[location]
 
     BASE_URL = 'https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query='
 
-    URL = f'(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:{job_title},locationUnion:(geoId:{geo_id}),spellCorrectionEnabled:true)&start={start_count}'
+    QUERY = f'(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:{job_title},locationUnion:(geoId:{location}),spellCorrectionEnabled:true)&start={start_count}'
 
-    return BASE_URL + URL
+    URL = BASE_URL + QUERY
+
+    return URL
+
+
 def fetch_data(url):
     response = requests.get(url=url, cookies=cookies, headers=headers)
-    if not response.raise_for_status():
-        print("Request successful. Status code:", response.status_code)
-    return response.json()
-def fetch_job_ids(result_json):
+    response.raise_for_status()
+    return response.json(), response.status_code
+
+
+def json_to_dataframe_job_ids(result_json):
+
     included_json = result_json["included"]
+
     data = pd.json_normalize(included_json)
+
     # title
     title = data[["entityUrn","title"]].dropna()
     title = title.rename(columns={"entityUrn": "*jobPosting"})
+
     # company_name
     company_name = data[["*jobPosting", "primaryDescription.text"]].dropna()
+
     # location
     location = data[["*jobPosting", "secondaryDescription.text"]].dropna()
     df = pd.merge(title,company_name, on="*jobPosting")
     job_list_df = pd.merge(df,location, on="*jobPosting")
+
     return job_list_df
-def job_list_to_csv(job_title, geo_id):
+
+
+def fetch_job_ids(job_title, location):
+
+    """
+    Linkedin üzerinde belirli arama kriterlere göre iş ilanlarının ID bilgilerini çeker.
+    Input olarak job_title ve location bilgisi verilmesi gerekir.
+    """
+
     start_count = 0
-    df = pd.DataFrame()
+    page_number = 0
+    all_job_ids_dataframe = pd.DataFrame()
+    log.info("fetch_job_ids Begins")
     try:
         while True:
-            url = generate_url(job_title, geo_id, start_count=start_count)
-            result_json = fetch_data(url)
-            if result_json is not None:  # Veri başarıyla çekildiyse işlem yap
-                # yeni gelen veri eski verinin üstüne ekleniyor.
-                df2 = fetch_job_ids(result_json)
-                df = pd.concat([df, df2], ignore_index=True)
-                # linkedin sayfa mantığı 0'dan başlayıp 25'er artmasından kaynaklı.
-                start_count += 25
-                if len(df2) == 0:
-                    break
-            else:
-                print("Veri çekme başarısız oldu. İşlem sonlandırılıyor.")
+
+            page_number += 1
+
+            # Parametrelere göre Request URL oluşturulması.
+            url = generate_url(job_title, location, start_count=start_count)
+
+            # Request URL
+            result_json, status_code = fetch_data(url)
+
+            print(f"Job Title: {job_title}, Location: {location}, Page Number: {page_number} | Status Code: {status_code}")
+
+
+            if not result_json["data"]["elements"]:
+                print("No more data for Job Id search.")
                 break
-        os.makedirs("outputs")
-        today = datetime.today().strftime("%d-%m-%y")
-        file_name = f"outputs/job_search_data.{today}.csv"
-        # csv dosyası oluşturuldu
-        df.to_csv(file_name, index=False)
-        return df
-    except Exception as e:
-        print("Hata oluştu:", str(e))
-        # sütun isimleri değişti, jod_id tek başına alındı
-        df.columns = ["job_id", "job_title", "company_name", "location"]
-        df['job_id'] = df['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
-        # outputs klasörü oluştur.
-        os.makedirs("outputs")
+
+            try: # Veri başarıyla çekildiyse işlem yap
+
+                job_id_dataframe = json_to_dataframe_job_ids(result_json)
+
+                all_job_ids_dataframe = pd.concat([all_job_ids_dataframe, job_id_dataframe], ignore_index=True)
+
+                # linkedin arama sayfasında sonuçlar 25 kayıt olacak şekilde artarak devam ediyor..
+                start_count += 25
+
+
+            except Exception as e:
+                logging.error("ERROR:", e)
+
+
+        # Transform Data
+        # Column isimleri değişti.
+        all_job_ids_dataframe.columns = ["job_id", "job_title", "company_name", "location"]
+        all_job_ids_dataframe['job_id'] = all_job_ids_dataframe['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
+
+        # Create outputs folder if not exist
+        os.makedirs("outputs", exist_ok=True)
+
+        # Generate File Path and CSV File
+        job_title = job_title.lower()
+        job_title = job_title.replace(" ", "_")
+
+        location = location.lower()
 
         today = datetime.today().strftime("%d-%m-%y")
-        file_name = f"outputs/job_search_data.{today}.csv"
-        # csv dosyası oluşturuldu
-        df.to_csv(file_name, index=False)
-        print("Veri Bitti")
-        return df
+        file_name = f'{job_title}_{location}_job_ids_data_{today}'
+        file_path = f"outputs/{file_name}.csv"
+
+        all_job_ids_dataframe.to_csv(file_path, index=False)
+
+        log.info("fetch_job_ids Successful")
+        return all_job_ids_dataframe
+
+    except Exception as e:
+        logging.error("Hata oluştu:", str(e))
+
+
+
+
 
 
 
@@ -109,6 +160,7 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
     job_detail_response.raise_for_status()
 
     return job_detail_response.json()["data"], job_detail_response.json()["included"]
+
 def get_job_detail_dataframe(job_id):
 
     job_json, included_json = fetch_job_details_json(job_id=job_id)
@@ -195,21 +247,25 @@ def get_job_detail_dataframe(job_id):
     job_detail_dataframe = pd.DataFrame(job_dict)
 
     return job_detail_dataframe
-def job_details_to_csv(DataFrame):
-    job_detail_df = pd.DataFrame()
 
+def job_details_to_csv(job_ids_dataframe, DEBUG=False):
+    
+    all_job_details_df = pd.DataFrame()
     counter = 0
 
+    if DEBUG == True:
+        job_ids_dataframe = job_ids_dataframe.head(5)
+
     # df ismindeki DataFrame'in satırlarında dolaşmak için tqdm kullanımı
-    for _, row in tqdm(DataFrame.iterrows(), total=len(DataFrame)):
+    for _, row in tqdm(job_ids_dataframe.iterrows(), total=len(job_ids_dataframe)):
         job_id = row["job_id"]
 
         try:
-            dataframe = get_job_detail_dataframe(job_id)
+            job_detail_df = get_job_detail_dataframe(job_id)
         except:
             print("Error:", job_id)
             time.sleep(10)
-        job_detail_df = pd.concat([job_detail_df, dataframe], ignore_index=True)
+        all_job_details_df = pd.concat([all_job_details_df, job_detail_df], ignore_index=True)
 
         time.sleep(random.randint(0, 1))
 
@@ -220,23 +276,19 @@ def job_details_to_csv(DataFrame):
         if counter == 50:
             try:
 
-                os.makedirs("outputs")
+                os.makedirs("outputs", exist_ok=True)
                 today = datetime.today().strftime("%d-%m-%y")
-                file_name = f"outputs/job_details_data.{today}.csv"
-                job_detail_df.to_csv(file_name, index=False)
+                file_name = f"outputs/_job_details_data_{today}.csv"
+                all_job_details_df.to_csv(file_name, index=False)
                 print("Excel dosyası oluşturuldu")
             except Exception as e:
-                print(e, job_detail_response.status_code)
+                print(e)
                 time.sleep(10)
             counter = 0
 
-    return job_detail_df
+    return all_job_details_df
 ########################################
 
 
 
-
-    if __name__ == "__main__":
-        cookies = cookies
-        headers = headers
 
