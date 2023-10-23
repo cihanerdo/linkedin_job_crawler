@@ -34,6 +34,7 @@ fetch_job_details_json(job_id=3723247395)
 get_job_detail_dataframe(3723247395)
 job_details_to_csv(df)
 
+
 if __name__ == "__main__":
     cookies
     headers

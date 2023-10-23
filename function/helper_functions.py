@@ -8,6 +8,7 @@ import random
 from config.conf import *
 import os
 from datetime import datetime
+from urllib.parse import quote
 
 
 
@@ -22,7 +23,7 @@ logger = logging.getLogger("linkedinsearch")
 
 
 def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
-    job_title = job_title_dict.get(job_title, "Bilinmeyen İş")
+    job_title = quote(job_title)
     location = geoid_dict.get(location, "Bilinmeyen Konum")
 
     BASE_URL = 'https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query='
@@ -146,36 +147,7 @@ def fetch_job_ids(job_title, location):
 
 
 
-####### jobdetail #######################
-# def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
-#     """
-#     Fetches details of a job posting from LinkedIn using its API.
-#
-#     Args:
-#         cookies (dict): A dictionary containing cookies for authentication (default is 'cookies' variable).
-#         headers (dict): A dictionary containing headers for the HTTP request (default is 'headers' variable).
-#         job_id (int): The unique identifier of the job posting (default is 3731588298).
-#
-#     Returns:
-#         tuple: A tuple containing two elements:
-#             1. Dictionary containing job details (retrieved from response.json()["data"]).
-#             2. List of included items (retrieved from response.json()["included"]).
-#
-#     Raises:
-#         HTTPError: If the HTTP request returns an error status code.
-#
-#     Example:
-#         data, included = fetch_job_details_json()
-#     """
-#     job_detail_response = requests.get(
-#         f'https://www.linkedin.com/voyager/api/jobs/jobPostings/{job_id}',
-#         cookies=cookies,
-#         headers=headers,
-#     )
-#
-#     job_detail_response.raise_for_status()
-#
-#     return job_detail_response.json()["data"], job_detail_response.json()["included"]
+
 
 def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
     """
@@ -324,7 +296,7 @@ def job_details_to_csv(job_ids_dataframe, DEBUG=False):
     if DEBUG == True:
         job_ids_dataframe = job_ids_dataframe.head(5)
 
-    # df ismindeki DataFrame'in satırlarında dolaşmak için tqdm kullanımı
+    # DataFrame'in satırlarında dolaşmak için tqdm kullanımı
     for _, row in tqdm(job_ids_dataframe.iterrows(), total=len(job_ids_dataframe)):
         job_id = row["job_id"]
 

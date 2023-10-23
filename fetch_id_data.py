@@ -13,6 +13,3 @@ json_to_dataframe_job_ids(de)
 
 df = fetch_job_ids("Data Analyst", "Türkiye")
 
-
-
-

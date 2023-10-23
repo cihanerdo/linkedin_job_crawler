@@ -57,11 +57,4 @@ geoid_dict = {"Türkiye": "102105699", "Almanya": "101282230", "İsviçre": "106
 "Güney Kore": "105149562", "İsrail": "101620260", "Litvanya": "101464403", "Romanya": "106670623", "Hırvatistan": "104688944",
 "Bulgaristan": "105333783", "Sırbistan": "101855366", "Yunanistan": "104677530", "Azerbaycan": "103226548", "Ukrayna": "102264497"}
 
-job_title_dict = {
-    "Data Analyst": "data%20analyst",
-    "Data Engineer": "data%20engineer",
-    "Data Scientist": "data%20scientist",
-    "Data Science": "data%20science",
-    "Software Engineer": "software%20engineer"
-}
 
