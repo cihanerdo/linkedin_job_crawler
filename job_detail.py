@@ -30,7 +30,9 @@ job_info = get_job_detail_dataframe(3402129076)
 job_details_to_csv(job_ids, DEBUG=True)
 
 
-tr_df.name
+fetch_job_details_json(job_id=3723247395)
+get_job_detail_dataframe(3723247395)
+job_details_to_csv(df)
 
 if __name__ == "__main__":
     cookies
