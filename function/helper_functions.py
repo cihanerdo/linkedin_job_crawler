@@ -1,7 +1,6 @@
 import requests
 import requests.exceptions  # requests modülünden RequestException'ı içe aktarın
 import pandas as pd
-import logging
 from tqdm import tqdm
 import time
 import random
@@ -9,20 +8,20 @@ from config.conf import *
 import os
 from datetime import datetime
 from urllib.parse import quote
+from logger import logger
 
-
-
-
-logging.basicConfig(filename="outputs/logs.log", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-root_logger = logging.getLogger()
-root_logger.addHandler(console_handler)
-logger = logging.getLogger("linkedinsearch")
+# logging.basicConfig(filename="outputs/logs.log", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.DEBUG)
+# console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+# root_logger = logging.getLogger()
+# root_logger.addHandler(console_handler)
+# root_logger.setLevel(logging.INFO)
+# logger = logging.getLogger("linkedincrawler")
 
 
 def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
+
     job_title = quote(job_title)
     location = geoid_dict.get(location, "Bilinmeyen Konum")
 
@@ -32,24 +31,26 @@ def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
 
     URL = BASE_URL + QUERY
 
-    logging.debug(f'URL Oluşturuldu: {URL}')  # URL oluşturulduğunda bir DEBUG mesajı ekle
+    logger.debug(f"Crawler URL created has been successfully")
 
     return URL
 
 # Veri çekme fonksiyonu
 def fetch_data(url):
+
     try:
         response = requests.get(url=url, cookies=cookies, headers=headers)
         response.raise_for_status()
-        logging.info(f'Veri çekme başarılı', response.status_code)
+        logger.debug(f"Data retrieval successful. Response status code: {response.status_code}")
         return response.json()
     except requests.exceptions.RequestException as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logging.error(f'Veri çekme hatası: {str(e)}')
-        return None, None
+        logger.error(f"An error occured during Job ID's crawling.{str(e)}")
+        return None
 
 
 def json_to_dataframe_job_ids(result_json):
+    logger.debug("Started JSON-to-DataFrame conversion process.")
     try:
         included_json = result_json["included"]
         data = pd.json_normalize(included_json)
@@ -66,60 +67,62 @@ def json_to_dataframe_job_ids(result_json):
         df = pd.merge(title, company_name, on="*jobPosting")
         job_list_df = pd.merge(df, location, on="*jobPosting")
 
-        logging.info('json_to_dataframe_job_ids işlemi başarıyla tamamlandı.')  # İşlem başarıyla tamamlandığında bir INFO mesajı ekle
+        logger.info('JSON-to-DataFrame processed successfully')  # İşlem başarıyla tamamlandığında bir INFO mesajı ekle
         return job_list_df
     except Exception as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logging.error(f'Hata oluştu: {str(e)}')
+        logger.error(f'An error occured during JSON-to-DataFrame conversion process.: {str(e)}')
         return None
 
 
-
-
-def fetch_job_ids(job_title, location):
+def fetch_job_ids(job_title, location, DEBUG):
 
     """
         Linkedin üzerinde belirli arama kriterlere göre iş ilanlarının ID bilgilerini çeker.
         Input olarak job_title ve location bilgisi verilmesi gerekir.
     """
-
+    location = location.lower()
     try:
         start_count = 0
         page_number = 0
         all_job_ids_dataframe = pd.DataFrame()
-        logging.info("fetch_job_ids Başlıyor")
+        logger.debug("fetch_job_ids Process Starting")
 
         while True:
             page_number += 1
 
             # Parametrelere göre Request URL oluşturulması.
             url = generate_url(job_title, location, start_count=start_count)
-
             # Request URL
             result_json = fetch_data(url)
+            total_job_count = result_json["data"]["paging"]["total"]
 
-            logging.info(
-                f"Job Title: {job_title}, Location: {location}, Page Number: {page_number}")
+            logger.info(f"Job Title: {job_title}, Location: {location}, Total Job Queried: {total_job_count}, Page Number: {page_number}")
 
             if not result_json["data"]["elements"]:
-                logging.info("Job Id araması için daha fazla veri yok.")
+                logger.info("No additional data available for Job ID search.")
                 break
 
             try:
                 # Veri başarıyla çekildiyse işlem yap
                 job_id_dataframe = json_to_dataframe_job_ids(result_json)
                 all_job_ids_dataframe = pd.concat([all_job_ids_dataframe, job_id_dataframe], ignore_index=True)
-
+                logger.debug("All Job ID's dataframe created and appended succesfully.")
                 # linkedin arama sayfasında sonuçlar 25 kayıt olacak şekilde artarak devam ediyor.
                 start_count += 25
             except Exception as e:
                 # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-                logging.error("Hata oluştu:", str(e))
+                logger.error("An error occured while Job ID dataframe creation", str(e))
+
+
+            if DEBUG:
+                logger.debug("DEBUG mode active. Crawled only the first page.")
+                break
 
         # Veriyi Dönüştür
         all_job_ids_dataframe.columns = ["job_id", "job_title", "company_name", "location"]
         all_job_ids_dataframe['job_id'] = all_job_ids_dataframe['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
-
+        logger.debug("Job ID Dataframe data transformation process is succeed.")
         # Var olan bir klasör oluştur
         os.makedirs("outputs", exist_ok=True)
 
@@ -134,19 +137,14 @@ def fetch_job_ids(job_title, location):
         file_path = f"outputs/{file_name}.csv"
 
         all_job_ids_dataframe.to_csv(file_path, index=False)
-
-        logging.info("fetch_job_ids Başarılı")
+        crawled_job_id_count = len(all_job_ids_dataframe)
+        total_job_count = result_json["data"]["paging"]["total"]
+        logger.info(f"{crawled_job_id_count} of {total_job_count} crawled.")
         return all_job_ids_dataframe
+
     except Exception as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logging.error("Hata oluştu:", str(e))
-
-
-
-
-
-
-
+        logger.error("An error occured while fetch_job_ids", str(e))
 
 
 def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
@@ -170,7 +168,7 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
         data, included = fetch_job_details_json()
     """
     # Debug: Job ID bilgisi loglanıyor.
-    logging.debug(f'Job ID: {job_id}')
+    logger.debug(f'Job ID: {job_id}')
 
     try:
         job_detail_response = requests.get(
@@ -182,23 +180,24 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
         job_detail_response.raise_for_status()
 
         # Debug: Başarılı bir şekilde veri çekildiğini logla.
-        logging.debug(f'Veri çekme başarılı')
+        logger.debug(f'Veri çekme başarılı')
 
-        return job_detail_response.json()["data"], job_detail_response.json()["included"]
+        return job_detail_response.json()
 
     except requests.exceptions.RequestException as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle.
-        logging.error(f'Veri çekme hatası: {str(e)}')
-        return None, None
+        logger.error(f'An error occured during detailed Job information. Job ID is: {job_id}. Error code: {str(e)}')
+        return None
 
 
 def get_job_detail_dataframe(job_id):
 
-    logging.debug(f'Job ID ile işlem başladı: {job_id}')
+    logger.debug(f'Job ID ile işlem başladı: {job_id}')
 
-    job_json, included_json = fetch_job_details_json(job_id=job_id)
+    job_details_json = fetch_job_details_json(job_id=job_id)
+    job_json = job_details_json["data"]
 
-    logging.debug(f'Job ID: {job_id}, JSON verisi alındı.')
+    logger.info(f"Successfully crawled and retrieved detailed information for Job ID: {job_id}.")
 
     try:
         job_id = job_json["entityUrn"]
@@ -279,22 +278,28 @@ def get_job_detail_dataframe(job_id):
                 "listed_date": [listed_date], "original_listed_date": [original_listed_date],
                 "title": [title], "views": [views], "is_remote": [is_remote]}
 
-    logging.debug(f'Job ID: {job_id}, DataFrame oluşturuldu.')
+    logger.debug(f'Job ID: {job_id}, DataFrame oluşturuldu.')
 
     job_detail_dataframe = pd.DataFrame(job_dict)
 
     return job_detail_dataframe
 
 
-def job_details_to_csv(job_ids_dataframe, DEBUG=False):
+def generate_job_details_csv(job_title, location, DEBUG):
 
-    logging.debug('job_details_to_csv fonksiyonu çalışıyor.')
+    location = location.lower()
+    logger.debug('job_details_to_csv fonksiyonu çalışıyor.')
+
+    job_ids_dataframe = fetch_job_ids(job_title, location, DEBUG=DEBUG)
+
+
 
     all_job_details_df = pd.DataFrame()
     counter = 0
 
-    if DEBUG == True:
+    if DEBUG:
         job_ids_dataframe = job_ids_dataframe.head(5)
+
 
     # DataFrame'in satırlarında dolaşmak için tqdm kullanımı
     for _, row in tqdm(job_ids_dataframe.iterrows(), total=len(job_ids_dataframe)):
@@ -302,10 +307,10 @@ def job_details_to_csv(job_ids_dataframe, DEBUG=False):
 
         try:
              job_detail_df = get_job_detail_dataframe(job_id)
-             logging.debug(f'Job ID: {job_id}, job_detail_df başarıyla oluşturuldu.')
+             logger.debug(f'Job ID: {job_id}, job_detail_df başarıyla oluşturuldu.')
 
         except Exception as e:
-            logging.error(f'Hata oluştu: Job ID - {job_id}, Hata: {str(e)}')
+            logger.error(f'Hata oluştu: Job ID - {job_id}, Hata: {str(e)}')
             time.sleep(10)
 
         all_job_details_df = pd.concat([all_job_details_df, job_detail_df], ignore_index=True)
@@ -316,17 +321,21 @@ def job_details_to_csv(job_ids_dataframe, DEBUG=False):
 
         # İlk 50 işlemde Excel dosyası oluştur. Sonrasında üstüne kaydet.
         # Oluşturamazsan 10 saniye dur.
-        if counter == 50:
+        if counter == 50 or counter == len(job_ids_dataframe):
             try:
 
                 os.makedirs("outputs", exist_ok=True)
                 today = datetime.today().strftime("%d-%m-%y")
-                file_name = f"outputs/_job_details_data_{today}.csv"
-                all_job_details_df.to_csv(file_name, index=False)
-                logging.debug(f'Excel dosyası oluşturuldu: {file_name}')
+
+                job_title = job_title.lower()
+                location = location.lower()
+                file_name = f'{job_title}_{location}_job_details_data_{today}'
+                file_path = f"outputs/{file_name}.csv"
+                all_job_details_df.to_csv(file_path, index=False)
+                logger.debug(f'Excel file creation completed successfully.: {file_name}')
 
             except Exception as e:
-                logging.error(f'Excel dosyası oluşturma hatası: {str(e)}')
+                logger.error(f'An error occured during creating Excel file: {str(e)}')
                 time.sleep(10)
             counter = 0
 
