@@ -16,9 +16,8 @@ parser.add_argument("-d", "--debug", action="store_true", help="Debug Mode")
 
 if __name__ == "__main__":
     args = parser.parse_args()
-
+    
     is_debug = args.debug
-    # print(is_debug)
     if is_debug:
          console_handler.setLevel(logging.DEBUG)
          logger.info("DEBUG mode activated.")
