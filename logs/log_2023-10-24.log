@@ -1,0 +1,93 @@
+2023-10-24 14:15:04,768 - linkedinsearch - INFO - data engineer turkey işlemi başlıyor.
+2023-10-24 14:15:28,540 - linkedinsearch - INFO - data engineer turkey işlemi başlıyor.
+2023-10-24 14:15:28,540 - root - DEBUG - job_details_to_csv fonksiyonu çalışıyor.
+2023-10-24 14:15:28,541 - root - INFO - fetch_job_ids Başlıyor
+2023-10-24 14:15:28,541 - root - DEBUG - Started URL generation process.
+2023-10-24 14:15:28,541 - root - INFO - Crawler URL has been successfully generated for data%20engineer title in 102105699 location: https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0
+2023-10-24 14:15:28,541 - root - DEBUG - https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0 oluşturuldu
+2023-10-24 14:15:28,546 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:15:29,865 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0 HTTP/1.1" 200 23005
+2023-10-24 14:15:29,985 - root - DEBUG - Data retrieval successful. Response status code: 200
+2023-10-24 14:15:29,989 - root - INFO - Job Title: data engineer, Location: turkey, Page Number: 1
+2023-10-24 14:15:29,989 - root - DEBUG - Started JSON-to-DataFrame conversion process.
+2023-10-24 14:15:30,002 - root - INFO - JSON-to-DataFrame processed successfully
+2023-10-24 14:15:30,002 - root - DEBUG - dataframe başarıyla oluşturuldu.
+2023-10-24 14:15:30,002 - root - DEBUG - DEBUG MODE OPENED. ONLY 1st Page Crawled...
+2023-10-24 14:15:30,002 - root - DEBUG - Veri düzenlemesi başarılı
+2023-10-24 14:15:30,005 - root - INFO - fetch_job_ids Başarılı
+2023-10-24 14:15:30,012 - root - DEBUG - Job ID ile işlem başladı: 3710189190
+2023-10-24 14:15:30,012 - root - DEBUG - Job ID: 3710189190
+2023-10-24 14:15:30,014 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:15:30,827 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3710189190 HTTP/1.1" 200 3708
+2023-10-24 14:15:30,828 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:15:30,830 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3710189190.
+2023-10-24 14:15:30,831 - root - DEBUG - Job ID: 3710189190, DataFrame oluşturuldu.
+2023-10-24 14:15:30,832 - root - DEBUG - Job ID: 3710189190, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:15:30,832 - root - DEBUG - Job ID ile işlem başladı: 3734539407
+2023-10-24 14:15:30,832 - root - DEBUG - Job ID: 3734539407
+2023-10-24 14:15:30,834 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:15:31,902 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3734539407 HTTP/1.1" 200 2988
+2023-10-24 14:15:31,903 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:15:31,904 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3734539407.
+2023-10-24 14:15:31,905 - root - DEBUG - Job ID: 3734539407, DataFrame oluşturuldu.
+2023-10-24 14:15:31,906 - root - DEBUG - Job ID: 3734539407, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:15:32,908 - root - DEBUG - Job ID ile işlem başladı: 3731851390
+2023-10-24 14:15:32,908 - root - DEBUG - Job ID: 3731851390
+2023-10-24 14:15:32,910 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:13,554 - root - INFO - data engineer turkey işlemi başlıyor.
+2023-10-24 14:16:13,554 - root - DEBUG - job_details_to_csv fonksiyonu çalışıyor.
+2023-10-24 14:16:13,555 - root - INFO - fetch_job_ids Başlıyor
+2023-10-24 14:16:13,555 - root - DEBUG - Started URL generation process.
+2023-10-24 14:16:13,555 - root - INFO - Crawler URL has been successfully generated for data%20engineer title in 102105699 location: https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0
+2023-10-24 14:16:13,555 - root - DEBUG - https://www.linkedin.com/voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0 oluşturuldu
+2023-10-24 14:16:13,559 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:14,988 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/voyagerJobsDashJobCards?decorationId=com.linkedin.voyager.dash.deco.jobs.search.JobSearchCardsCollection-186&count=25&q=jobSearch&query=(origin:JOB_SEARCH_PAGE_SEARCH_BUTTON,keywords:data%20engineer,locationUnion:(geoId:102105699),spellCorrectionEnabled:true)&start=0 HTTP/1.1" 200 23044
+2023-10-24 14:16:15,112 - root - DEBUG - Data retrieval successful. Response status code: 200
+2023-10-24 14:16:15,116 - root - INFO - Job Title: data engineer, Location: turkey, Page Number: 1
+2023-10-24 14:16:15,116 - root - DEBUG - Started JSON-to-DataFrame conversion process.
+2023-10-24 14:16:15,130 - root - INFO - JSON-to-DataFrame processed successfully
+2023-10-24 14:16:15,130 - root - DEBUG - dataframe başarıyla oluşturuldu.
+2023-10-24 14:16:15,130 - root - DEBUG - DEBUG MODE OPENED. ONLY 1st Page Crawled...
+2023-10-24 14:16:15,130 - root - DEBUG - Veri düzenlemesi başarılı
+2023-10-24 14:16:15,133 - root - INFO - fetch_job_ids Başarılı
+2023-10-24 14:16:15,140 - root - DEBUG - Job ID ile işlem başladı: 3710189190
+2023-10-24 14:16:15,140 - root - DEBUG - Job ID: 3710189190
+2023-10-24 14:16:15,142 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:16,322 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3710189190 HTTP/1.1" 200 3708
+2023-10-24 14:16:16,323 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:16:16,324 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3710189190.
+2023-10-24 14:16:16,325 - root - DEBUG - Job ID: 3710189190, DataFrame oluşturuldu.
+2023-10-24 14:16:16,326 - root - DEBUG - Job ID: 3710189190, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:16:17,327 - root - DEBUG - Job ID ile işlem başladı: 3734539407
+2023-10-24 14:16:17,327 - root - DEBUG - Job ID: 3734539407
+2023-10-24 14:16:17,328 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:18,155 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3734539407 HTTP/1.1" 200 2988
+2023-10-24 14:16:18,156 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:16:18,158 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3734539407.
+2023-10-24 14:16:18,158 - root - DEBUG - Job ID: 3734539407, DataFrame oluşturuldu.
+2023-10-24 14:16:18,159 - root - DEBUG - Job ID: 3734539407, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:16:18,160 - root - DEBUG - Job ID ile işlem başladı: 3731851390
+2023-10-24 14:16:18,160 - root - DEBUG - Job ID: 3731851390
+2023-10-24 14:16:18,162 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:19,011 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3731851390 HTTP/1.1" 200 5162
+2023-10-24 14:16:19,011 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:16:19,013 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3731851390.
+2023-10-24 14:16:19,014 - root - DEBUG - Job ID: 3731851390, DataFrame oluşturuldu.
+2023-10-24 14:16:19,015 - root - DEBUG - Job ID: 3731851390, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:16:20,016 - root - DEBUG - Job ID ile işlem başladı: 3719182823
+2023-10-24 14:16:20,016 - root - DEBUG - Job ID: 3719182823
+2023-10-24 14:16:20,017 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:20,862 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3719182823 HTTP/1.1" 200 3878
+2023-10-24 14:16:20,863 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:16:20,864 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3719182823.
+2023-10-24 14:16:20,865 - root - DEBUG - Job ID: 3719182823, DataFrame oluşturuldu.
+2023-10-24 14:16:20,866 - root - DEBUG - Job ID: 3719182823, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:16:20,867 - root - DEBUG - Job ID ile işlem başladı: 3740013817
+2023-10-24 14:16:20,867 - root - DEBUG - Job ID: 3740013817
+2023-10-24 14:16:20,868 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): www.linkedin.com:443
+2023-10-24 14:16:21,963 - urllib3.connectionpool - DEBUG - https://www.linkedin.com:443 "GET /voyager/api/jobs/jobPostings/3740013817 HTTP/1.1" 200 5703
+2023-10-24 14:16:21,965 - root - DEBUG - Veri çekme başarılı
+2023-10-24 14:16:21,967 - root - INFO - Successfully crawled and retrieved detailed information for Job ID: 3740013817.
+2023-10-24 14:16:21,967 - root - DEBUG - Job ID: 3740013817, DataFrame oluşturuldu.
+2023-10-24 14:16:21,968 - root - DEBUG - Job ID: 3740013817, job_detail_df başarıyla oluşturuldu.
+2023-10-24 14:16:21,971 - root - DEBUG - Excel file creation completed successfully.: data engineer_turkey_job_details_data_24-10-23
