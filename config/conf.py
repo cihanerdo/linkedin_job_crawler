@@ -1,6 +1,9 @@
 import requests
 import os
 from dotenv import load_dotenv, find_dotenv
+from sqlalchemy import create_engine
+
+
 
 load_dotenv(find_dotenv())
 
@@ -19,6 +22,16 @@ headers = {
     'accept': 'application/vnd.linkedin.normalized+json+2.1',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
 }
+
+
+database_name = "linkedin_crawler"
+user_name = "postgres"
+password = os.getenv("password")
+host_ip = "localhost"
+host_port = "5432"
+
+
+
 
 
 geoid_dict = {"turkey": "102105699", "germany": "101282230", "switzerland": "106693272", "usa": "103644278",
