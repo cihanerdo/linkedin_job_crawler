@@ -3,3 +3,4 @@ fonksiyon_deneme.py
 config/__pycache__
 /outputs/
 .env
+deneme_postgresql.py

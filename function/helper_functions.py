@@ -1,3 +1,5 @@
+import logging
+
 import requests
 import requests.exceptions  # requests modülünden RequestException'ı içe aktarın
 import pandas as pd
@@ -10,14 +12,6 @@ from datetime import datetime
 from urllib.parse import quote
 from logger import logger
 
-# logging.basicConfig(filename="outputs/logs.log", level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# console_handler = logging.StreamHandler()
-# console_handler.setLevel(logging.DEBUG)
-# console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-# root_logger = logging.getLogger()
-# root_logger.addHandler(console_handler)
-# root_logger.setLevel(logging.INFO)
-# logger = logging.getLogger("linkedincrawler")
 
 
 def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
@@ -45,7 +39,7 @@ def fetch_data(url):
         return response.json()
     except requests.exceptions.RequestException as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logger.error(f"An error occured during Job ID's crawling.{str(e)}")
+        logger.error(f"An error occurred during Job ID's crawling.{str(e)}")
         return None
 
 
@@ -71,7 +65,7 @@ def json_to_dataframe_job_ids(result_json):
         return job_list_df
     except Exception as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logger.error(f'An error occured during JSON-to-DataFrame conversion process.: {str(e)}')
+        logger.error(f'An error occurred during JSON-to-DataFrame conversion process.: {str(e)}')
         return None
 
 
@@ -112,7 +106,7 @@ def fetch_job_ids(job_title, location, DEBUG):
                 start_count += 25
             except Exception as e:
                 # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-                logger.error("An error occured while Job ID dataframe creation", str(e))
+                logger.error("An error occurred while Job ID dataframe creation", str(e))
 
 
             if DEBUG:
@@ -144,7 +138,7 @@ def fetch_job_ids(job_title, location, DEBUG):
 
     except Exception as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
-        logger.error("An error occured while fetch_job_ids", str(e))
+        logger.error("An error occurred while fetch_job_ids", str(e))
 
 
 def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
@@ -186,7 +180,7 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
 
     except requests.exceptions.RequestException as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle.
-        logger.error(f'An error occured during detailed Job information. Job ID is: {job_id}. Error code: {str(e)}')
+        logger.error(f'An error occurred during detailed Job information. Job ID is: {job_id}. Error code: {str(e)}')
         return None
 
 
@@ -196,6 +190,7 @@ def get_job_detail_dataframe(job_id):
 
     job_details_json = fetch_job_details_json(job_id=job_id)
     job_json = job_details_json["data"]
+    included_json = job_details_json["included"]
 
     logger.info(f"Successfully crawled and retrieved detailed information for Job ID: {job_id}.")
 
@@ -269,6 +264,9 @@ def get_job_detail_dataframe(job_id):
     except:
         is_remote = None
 
+    today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+
+
     job_id = job_id.replace("urn:li:fs_normalized_jobPosting:", "")
 
     job_dict = {"job_id": [job_id], "job_description": [job_description], "job_apply_count": [job_apply_count],
@@ -276,7 +274,7 @@ def get_job_detail_dataframe(job_id):
                 "experience_level": [experience_level], "industries": [industries],
                 "job_functions": [job_functions], "location": [location],
                 "listed_date": [listed_date], "original_listed_date": [original_listed_date],
-                "title": [title], "views": [views], "is_remote": [is_remote]}
+                "title": [title], "views": [views], "is_remote": [is_remote], "load_date": [today]}
 
     logger.debug(f'Job ID: {job_id}, DataFrame oluşturuldu.')
 
@@ -285,13 +283,10 @@ def get_job_detail_dataframe(job_id):
     return job_detail_dataframe
 
 
-def generate_job_details_csv(job_title, location, DEBUG):
+def generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG):
 
     location = location.lower()
     logger.debug('job_details_to_csv fonksiyonu çalışıyor.')
-
-    job_ids_dataframe = fetch_job_ids(job_title, location, DEBUG=DEBUG)
-
 
 
     all_job_details_df = pd.DataFrame()
@@ -335,7 +330,7 @@ def generate_job_details_csv(job_title, location, DEBUG):
                 logger.debug(f'Excel file creation completed successfully.: {file_name}')
 
             except Exception as e:
-                logger.error(f'An error occured during creating Excel file: {str(e)}')
+                logger.error(f'An error occurred during creating Excel file: {str(e)}')
                 time.sleep(10)
             counter = 0
 
@@ -343,5 +338,15 @@ def generate_job_details_csv(job_title, location, DEBUG):
 ########################################
 
 
+def create_postgresql_connection():
+    con = f"postgresql://{user_name}:{password}@{host_ip}:{host_port}/{database_name}"
+    engine = create_engine(con)
+    return engine
+def export_postgresql(dataframe, table_name):
 
-
+    engine = create_postgresql_connection()
+    try:
+        dataframe.to_sql(f"{table_name}", con=engine , index=False, if_exists='append')
+        logging.info("Data has been successfully transferred to the database.")
+    except Exception as e:
+        raise logging.error("An error occurred while transfer jobs data")
