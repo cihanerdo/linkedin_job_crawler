@@ -17,16 +17,14 @@ parser.add_argument("-d", "--debug", action="store_true", help="Debug Mode")
 def crawler():
 
     args = parser.parse_args()
-
+    
     is_debug = args.debug
-    # print(is_debug)
     if is_debug:
         console_handler.setLevel(logging.DEBUG)
         logger.info("DEBUG mode activated.")
 
     job_title = args.job_title
     location = args.location.lower()
-
 
     job_ids_dataframe = fetch_job_ids(job_title, location, DEBUG=is_debug)
     detailed_job_data = generate_job_details_csv(job_ids_dataframe,"data engineer", "norway", DEBUG=is_debug)
