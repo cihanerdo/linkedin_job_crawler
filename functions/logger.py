@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-log_dir = 'outputs/logs'
+log_dir = '../outputs/logs'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 

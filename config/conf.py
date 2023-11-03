@@ -1,8 +1,8 @@
 import requests
 import os
 from dotenv import load_dotenv, find_dotenv
+from functions.logger import logger, console_handler
 from sqlalchemy import create_engine
-
 
 
 load_dotenv(find_dotenv())
@@ -11,6 +11,12 @@ CSRF_TOKEN = os.getenv("CSRF_TOKEN")
 JSESSION_ID = os.getenv("CSRF_TOKEN")
 LI_AT = os.getenv("LI_AT")
 
+# Database Information
+
+DB_USERNAME = os.getenv("DB_USERNAME")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST_IP = os.getenv("DB_HOST_IP")
+DB_NAME = os.getenv("DB_NAME")
 
 cookies = {
     'JSESSIONID': JSESSION_ID,
@@ -22,17 +28,6 @@ headers = {
     'accept': 'application/vnd.linkedin.normalized+json+2.1',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
 }
-
-
-database_name = "linkedin_crawler"
-user_name = "postgres"
-password = os.getenv("password")
-host_ip = "localhost"
-host_port = "5432"
-
-
-
-
 
 geoid_dict = {"turkey": "102105699", "germany": "101282230", "switzerland": "106693272", "usa": "103644278",
               "france": "105015875", "canada": "101174742", "denmark": "104514075", "united kingdom": "101165590",

@@ -1,6 +1,3 @@
-import logging
-
-import requests
 import requests.exceptions  # requests modülünden RequestException'ı içe aktarın
 import pandas as pd
 from tqdm import tqdm
@@ -10,9 +7,8 @@ from config.conf import *
 import os
 from datetime import datetime
 from urllib.parse import quote
-from logger import logger
-
-
+from functions.logger import logger
+from sqlalchemy import create_engine
 
 def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
 
@@ -75,6 +71,8 @@ def fetch_job_ids(job_title, location, DEBUG):
         Linkedin üzerinde belirli arama kriterlere göre iş ilanlarının ID bilgilerini çeker.
         Input olarak job_title ve location bilgisi verilmesi gerekir.
     """
+
+    today = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
     location = location.lower()
     try:
         start_count = 0
@@ -100,6 +98,9 @@ def fetch_job_ids(job_title, location, DEBUG):
             try:
                 # Veri başarıyla çekildiyse işlem yap
                 job_id_dataframe = json_to_dataframe_job_ids(result_json)
+                job_id_dataframe["job_title_search_term"] = job_title
+                job_id_dataframe["location_search_term"] = location
+                job_id_dataframe["load_date"] = today
                 all_job_ids_dataframe = pd.concat([all_job_ids_dataframe, job_id_dataframe], ignore_index=True)
                 logger.debug("All Job ID's dataframe created and appended succesfully.")
                 # linkedin arama sayfasında sonuçlar 25 kayıt olacak şekilde artarak devam ediyor.
@@ -114,16 +115,18 @@ def fetch_job_ids(job_title, location, DEBUG):
                 break
 
         # Veriyi Dönüştür
-        all_job_ids_dataframe.columns = ["job_id", "job_title", "company_name", "location"]
+        all_job_ids_dataframe.columns = ["job_id", "job_title", "company_name", "location", "job_title_search_term", "location_search_term", "load_date"]
         all_job_ids_dataframe['job_id'] = all_job_ids_dataframe['job_id'].str.replace('urn:li:fsd_jobPosting:', '')
         logger.debug("Job ID Dataframe data transformation process is succeed.")
+
+
         # Var olan bir klasör oluştur
         os.makedirs("outputs", exist_ok=True)
+
 
         # Dosya Yolu Oluştur ve CSV Dosyasını Kaydet
         job_title = job_title.lower()
         job_title = job_title.replace(" ", "_")
-
         location = location.lower()
 
         today = datetime.today().strftime("%d-%m-%y")
@@ -338,15 +341,8 @@ def generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG):
 ########################################
 
 
-def create_postgresql_connection():
-    con = f"postgresql://{user_name}:{password}@{host_ip}:{host_port}/{database_name}"
+def create_postgresql_connection(DB_USERNAME, DB_PASSWORD, DB_HOST_IP, DB_NAME):
+    con = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST_IP}:5432/{DB_NAME}"
     engine = create_engine(con)
     return engine
-def export_postgresql(dataframe, table_name):
 
-    engine = create_postgresql_connection()
-    try:
-        dataframe.to_sql(f"{table_name}", con=engine , index=False, if_exists='append')
-        logging.info("Data has been successfully transferred to the database.")
-    except Exception as e:
-        raise logging.error("An error occurred while transfer jobs data")

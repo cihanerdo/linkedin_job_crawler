@@ -1,10 +1,6 @@
-import logging
-from function.helper_functions import *
-from config.conf import *
-import os
+from functions.helper_functions import *
 import argparse
-from logger import logger, console_handler
-
+from functions.logger import *
 
 
 parser = argparse.ArgumentParser()
@@ -16,6 +12,7 @@ parser.add_argument("-d", "--debug", action="store_true", help="Debug Mode")
 
 def crawler():
 
+    engine = create_postgresql_connection(DB_USERNAME, DB_PASSWORD, DB_HOST_IP, DB_NAME)
     args = parser.parse_args()
     
     is_debug = args.debug
@@ -27,14 +24,21 @@ def crawler():
     location = args.location.lower()
 
     job_ids_dataframe = fetch_job_ids(job_title, location, DEBUG=is_debug)
-    detailed_job_data = generate_job_details_csv(job_ids_dataframe,"data engineer", "norway", DEBUG=is_debug)
 
-    export_postgresql(job_ids_dataframe, "jobs")
+    try:
+        job_ids_dataframe.to_sql(name="jobs", schema="stg", con=engine, index=False, if_exists='replace')
+        logger.info("Data has been successfully transferred to the database.")
+    except Exception as e:
+        raise logger.error("An error occurred while transfer jobs data")
 
-    export_postgresql(detailed_job_data, table_name="job_details")
 
+    detailed_job_data = generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG=is_debug)
 
-
+    try:
+        detailed_job_data.to_sql(name="job_details", schema="stg",  con=engine, index=False, if_exists='replace')
+        logger.info("Data has been successfully transferred to the database.")
+    except Exception as e:
+        raise logger.error("An error occurred while transfer jobs data")
 
 
 
