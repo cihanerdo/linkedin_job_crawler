@@ -3,13 +3,32 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from functions.logger import logger, console_handler
 from sqlalchemy import create_engine
+from http.cookiejar import MozillaCookieJar
 
 
 load_dotenv(find_dotenv())
 
-CSRF_TOKEN = os.getenv("CSRF_TOKEN")
-JSESSION_ID = os.getenv("CSRF_TOKEN")
-LI_AT = os.getenv("LI_AT")
+# get cookies
+# https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc/related
+# use this extensions for getting cookies
+
+cookies = MozillaCookieJar("config/cookie.txt")
+cookies.load(ignore_discard=True, ignore_expires=True)
+
+# fetch jsessionid for headers
+
+for cookie in cookies:
+    if cookie.name == "JSESSIONID":
+        JSESSIONID = cookie.value.strip('"')
+        break
+
+
+headers = {
+ 'csrf-token': JSESSIONID,
+ 'accept': 'application/vnd.linkedin.normalized+json+2.1',
+ 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+}
+
 
 # Database Information
 
@@ -18,16 +37,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST_IP = os.getenv("DB_HOST_IP")
 DB_NAME = os.getenv("DB_NAME")
 
-cookies = {
-    'JSESSIONID': JSESSION_ID,
-    'li_at': LI_AT
-}
 
-headers = {
-    'csrf-token': CSRF_TOKEN,
-    'accept': 'application/vnd.linkedin.normalized+json+2.1',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
-}
 
 geoid_dict = {"turkey": "102105699", "germany": "101282230", "switzerland": "106693272", "usa": "103644278",
               "france": "105015875", "canada": "101174742", "denmark": "104514075", "united kingdom": "101165590",
