@@ -10,7 +10,7 @@ from urllib.parse import quote
 from functions.logger import logger
 from sqlalchemy import create_engine
 
-def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
+def generate_url(job_title="Data Engineer", location="Turkey", start_count=0):
 
     job_title = quote(job_title)
     location = geoid_dict.get(location, "Bilinmeyen Konum")
@@ -177,7 +177,7 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
         job_detail_response.raise_for_status()
 
         # Debug: Başarılı bir şekilde veri çekildiğini logla.
-        logger.debug(f'Veri çekme başarılı')
+        logger.info(f'Data Successfully crawled:{job_id}')
 
         return job_detail_response.json()
 
@@ -189,13 +189,12 @@ def fetch_job_details_json(cookies=cookies, headers=headers, job_id=3731588298):
 
 def get_job_detail_dataframe(job_id):
 
-    logger.debug(f'Job ID ile işlem başladı: {job_id}')
+    logger.debug(f'Job ID data transformation process is started: {job_id}')
 
     job_details_json = fetch_job_details_json(job_id=job_id)
     job_json = job_details_json["data"]
     included_json = job_details_json["included"]
 
-    logger.info(f"Successfully crawled and retrieved detailed information for Job ID: {job_id}.")
 
     try:
         job_id = job_json["entityUrn"]
@@ -279,9 +278,10 @@ def get_job_detail_dataframe(job_id):
                 "listed_date": [listed_date], "original_listed_date": [original_listed_date],
                 "title": [title], "views": [views], "is_remote": [is_remote], "load_date": [today]}
 
-    logger.debug(f'Job ID: {job_id}, DataFrame oluşturuldu.')
 
     job_detail_dataframe = pd.DataFrame(job_dict)
+    
+    logger.info(f'Job ID data transformation process is completed: {job_id}')
 
     return job_detail_dataframe
 
@@ -289,7 +289,7 @@ def get_job_detail_dataframe(job_id):
 def generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG):
 
     location = location.lower()
-    logger.debug('job_details_to_csv fonksiyonu çalışıyor.')
+    logger.debug('generate_job_details_csv function is started.')
 
 
     all_job_details_df = pd.DataFrame()
@@ -305,7 +305,6 @@ def generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG):
 
         try:
              job_detail_df = get_job_detail_dataframe(job_id)
-             logger.debug(f'Job ID: {job_id}, job_detail_df başarıyla oluşturuldu.')
 
         except Exception as e:
             logger.error(f'Hata oluştu: Job ID - {job_id}, Hata: {str(e)}')
