@@ -26,7 +26,7 @@ def crawler():
     job_ids_dataframe = fetch_job_ids(job_title, location, DEBUG=is_debug)
 
     try:
-        job_ids_dataframe.to_sql(name="jobs", schema="stg", con=engine, index=False, if_exists='replace')
+        job_ids_dataframe.to_sql(name="jobs", schema="stg", con=engine, index=False, if_exists='append')
         logger.info("Data has been successfully transferred to the database.")
     except Exception as e:
         raise logger.error("An error occurred while transfer jobs data")
@@ -35,7 +35,7 @@ def crawler():
     detailed_job_data = generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG=is_debug)
 
     try:
-        detailed_job_data.to_sql(name="job_details", schema="stg",  con=engine, index=False, if_exists='replace')
+        detailed_job_data.to_sql(name="job_details", schema="stg",  con=engine, index=False, if_exists='append')
         logger.info("Data has been successfully transferred to the database.")
     except Exception as e:
         raise logger.error("An error occurred while transfer jobs data")
