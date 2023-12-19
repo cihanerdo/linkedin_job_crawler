@@ -17,7 +17,7 @@ dags/__init__.py
 dags/configs/__pycache__
 dags/configs/__init__.py
 dags/functions/__pycache__
-dags/functions/__init__.py
+functions/__init__.py
 dags/outputs
 dags/env
 functions/__pycache__
