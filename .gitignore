@@ -18,10 +18,8 @@ functions/__init__.py
 values.yaml
 postgres
 logs/scheduler
-
-
-config/cookie.txt
-
+configs/cookie.txt
+dags/configs/cookie.txt
 ### Linux ###
 *~
 
