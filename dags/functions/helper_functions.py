@@ -8,7 +8,6 @@ import os
 from datetime import datetime
 from urllib.parse import quote
 from functions.logger import logger
-from sqlalchemy import create_engine
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from collections import Counter
@@ -17,7 +16,6 @@ from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from stop_words import get_stop_words
 import re
 from nltk.corpus import stopwords
-from io import StringIO
 
 
 def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
@@ -32,17 +30,19 @@ def generate_url(job_title="Data Engineer", location="Türkiye", start_count=0):
     URL = BASE_URL + QUERY
 
     logger.debug(f"Crawler URL created has been successfully")
-    print(URL)
+
     return URL
 
 # Veri çekme fonksiyonu
 def fetch_data(url):
 
-    print(url)
     try:
         response = requests.get(url=url, cookies=cookies, headers=headers)
         response.raise_for_status()
         logger.debug(f"Data retrieval successful. Response status code: {response.status_code}")
+        if response.status_code != 200:
+            logger.error(f"HTTP request failed with status code: {response.status_code}")
+            return None
         return response.json()
     except requests.exceptions.RequestException as e:
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
@@ -333,13 +333,13 @@ def generate_job_details_csv(job_ids_dataframe, job_title, location, DEBUG):
         if counter == 50 or counter == len(job_ids_dataframe):
             try:
 
-                os.makedirs("dags/outputs", exist_ok=True)
+                os.makedirs("outputs", exist_ok=True)
                 today = datetime.today().strftime("%d-%m-%y")
 
                 job_title = job_title.lower()
                 location = location.lower()
                 file_name = f'{job_title}_{location}_job_details_data_{today}'
-                file_path = f"dags/outputs/{file_name}.csv"
+                file_path = f"outputs/{file_name}.csv"
                 all_job_details_df.to_csv(file_path, index=False)
                 logger.debug(f'Excel file creation completed successfully.: {file_name}')
 
@@ -374,12 +374,12 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
         job_id = row["job_id"]
 
         try:
-                job_detail_df = get_job_detail_dataframe(job_id)
-                logger.debug(f'Job ID: {job_id}, job_detail_df completed successfully.')
+            job_detail_df = get_job_detail_dataframe(job_id)
+            logger.debug(f'Job ID: {job_id}, job_detail_df completed successfully.')
 
         except Exception as e:
-                logger.error(f'Hata oluştu: Job ID - {job_id}, Hata: {str(e)}')
-                time.sleep(10)
+            logger.error(f'Hata oluştu: Job ID - {job_id}, Hata: {str(e)}')
+            time.sleep(10)
 
         all_job_details_df = pd.concat([all_job_details_df, job_detail_df], ignore_index=True)
         all_job_details_df["cleaned_description"] = all_job_details_df["job_description"].fillna("").apply(
@@ -397,7 +397,7 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
         important_keywords = tfidf_vectorizer.get_feature_names_out()
         all_job_details_df["skills"] = all_job_details_df["cleaned_description"].apply(lambda x: ', '.join(
             [word for word in x.split() if
-                    word in important_keywords]))
+             word in important_keywords]))
         logger.info("skills_catcher successful.")
 
         time.sleep(random.randint(0, 1))
@@ -405,7 +405,7 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
         counter += 1
 
         # İlk 50 işlemde CSV dosyası oluştur. Sonrasında üstüne kaydet.
-         # Oluşturamazsan 10 saniye dur.
+        # Oluşturamazsan 10 saniye dur.
         if counter == 50 or counter == len(job_ids_dataframe):
             try:
                 os.makedirs("dags/outputs/", exist_ok=True)
@@ -535,7 +535,7 @@ def fetch_job_ids_airflow(job_title, location, DEBUG, **kwargs):
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
         logger.error("An error occurred while fetch_job_ids", str(e))
 
-def upload_to_gcs(data_folder,  **kwargs):
+def upload_to_gcs(data_folder, **kwargs):
     data_folder = "dags/outputs/"
     bucket_name = 'linkedin-job'
     gcs_conn_id = 'google_cloud_connection'
@@ -575,12 +575,6 @@ def delete_csv_files(data_folder, **kwargs):
     except Exception as e:
         print(f"An error occurred while deleting CSV files: {str(e)}")
 ########################################
-
-
-def create_postgresql_connection(DB_USERNAME, DB_PASSWORD, DB_HOST_IP, DB_NAME):
-    con = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST_IP}:5432/{DB_NAME}"
-    engine = create_engine(con)
-    return engine
 
 
 def skills_catcher(DataFrame):

@@ -1,0 +1,21 @@
+# Netscape HTTP Cookie File
+# http://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file!  Do not edit.
+
+.linkedin.com	TRUE	/	TRUE	1717150851	bcookie	"v=2&f2acaf57-4b21-4164-895c-40e116b6a390"
+.www.linkedin.com	TRUE	/	TRUE	1717150851	bscookie	"v=1&20230811194405aff7bc7b-a573-4c3b-8b05-e253d858c0e0AQFcAF1Q0YZzrcpQRzOCT_hiQMfEgmaK"
+.www.linkedin.com	TRUE	/	TRUE	1709230418	JSESSIONID	"ajax:0363227315382656329"
+.linkedin.com	TRUE	/	TRUE	1707224560	li_sugr	67c70732-b0f2-48a9-8118-4c8c41e0b125
+.linkedin.com	TRUE	/	TRUE	1709230418	liap	true
+.linkedin.com	TRUE	/	TRUE	1702040538	AnalyticsSyncHistory	AQJ5JD9Zoe1sgwAAAYuvBsMN8F10J33scYLfHEMjlttk4W0gLY4fY2S_OGnxIz4WxXlTGFCZqX59cetGCtAjgg
+.linkedin.com	TRUE	/	TRUE	1702040538	lms_ads	AQF1PYK1mBnTHgAAAYuvBsPhOXro8IvMBwsM-T2ezFgATAKwccenGI-f-RVeFVGtlvA8hgbaOLOsbUs8IYXoQWGLHspcZ_ZI
+.linkedin.com	TRUE	/	TRUE	1702040538	lms_analytics	AQF1PYK1mBnTHgAAAYuvBsPhOXro8IvMBwsM-T2ezFgATAKwccenGI-f-RVeFVGtlvA8hgbaOLOsbUs8IYXoQWGLHspcZ_ZI
+.www.linkedin.com	TRUE	/	TRUE	1702203649	timezone	Europe/Istanbul
+.linkedin.com	TRUE	/	TRUE	1708694212	_guid	662c418b-c7f9-4d6a-94f0-9fe7db1250b7
+.www.linkedin.com	TRUE	/	TRUE	1702203649	li_theme	dark
+.www.linkedin.com	TRUE	/	TRUE	1702203649	li_theme_set	user
+.www.linkedin.com	TRUE	/	TRUE	1717006418	li_at	AQEDATJO64MBJOrjAAABjCaWDdUAAAGMSqKR1U0At3EGm8dwDiN7RlbwE2BfazC59fxBoEjVUqBJSSFrogeIys93DHeuTV2qQ6RWRZdMNyzzW5p9cZd7TMW4-_9C34_5PV67hbO0Xkc35qWKbtIgb10T
+.linkedin.com	TRUE	/	TRUE	1701599450	lidc	"b=VB99:s=V:r=V:a=V:p=V:g=2968:u=77:x=1:i=1701535280:t=1701599447:v=2:sig=AQFlPlUWz8MQouJUns_h6RVkDGQhSKqJ"
+.linkedin.com	TRUE	/	TRUE	0	lang	v=2&lang=en-us
+.linkedin.com	TRUE	/	TRUE	1702203650	UserMatchHistory	AQJirq5GxDg60QAAAYwvMeVCKVJ_HJ2mPGAPN3wDhnN84Qr4rqCvSOOkK13MPczVZmgYXvrfFAOHkv63SkI5ZAZzTb7XH6T56g90KxmClYgmpbU5TqghUloQzVSTjY-fqfOL8AQ3-fm-PFvqA706DCiZyhnK2Y49Fg55CDR5D1RAEhpCIgsd7QLxOY8VnQuzFSJsXK0rP8gYtjw5Z_RgVNLaoBiPLJI9u1wZscTaEJWSfJi9vLZ-oL0D629Zshxn7oufhKqDdCdSiy1eeNmglyT36aSE0c0AJjWgUwf_iA
+.linkedin.com	TRUE	/	TRUE	0	sdsc	22%3A1%2C1701598848636%7EJAPP%2C0zCCux%2Bv0XEOgyZhcunxhf%2Bol%2FaM%3D
