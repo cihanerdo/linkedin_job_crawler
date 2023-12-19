@@ -1,6 +1,6 @@
 fonksiyon_deneme.py
 .idea
-configs/__pycache__
+config/__pycache__
 /outputs/
 .env
 deneme_postgresql.py
@@ -10,19 +10,3 @@ denemeee.py
 descriptiondeneme.ipynb
 sherlock.png
 Untitled.ipynb
-.vs
-.ipynb_checkpoints
-dags/__pycache__
-dags/__init__.py
-dags/configs/__pycache__
-dags/configs/__init__.py
-dags/functions/__pycache__
-functions/__init__.py
-dags/outputs
-dags/env
-functions/__pycache__
-functions/__init__.py
-/logs
-/postgres
-linkedin-crawler-vm-86e1c0957bb4.json
-values.yaml
