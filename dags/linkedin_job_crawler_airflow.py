@@ -641,27 +641,32 @@ with DAG(
                 dwh.jobs_
         );
 
-                INSERT INTO dwh.verified_jobs(
+                INSERT
+	INTO
+	dwh.verified_jobs(
         WITH verification_cte AS (
-        SELECT
-            CASE
-            WHEN job_search = 'Data Engineer' AND job_description ILIKE '%data engineer%' THEN 1
-            WHEN job_search = 'Data Analyst' AND job_description ILIKE '%data analyst%' THEN 1
-            WHEN job_search = 'Data Scientist' AND job_description ILIKE '%data scientist%' THEN 1
-            ELSE 0
-            END AS is_verified,
-            *
-        FROM
-            dwh.split_skills
+	SELECT
+		CASE
+			WHEN job_search = 'Data Engineer'
+			AND job_description ILIKE '%data engineer%' THEN 1
+			WHEN job_search = 'Data Analyst'
+			AND job_description ILIKE '%data analyst%' THEN 1
+			WHEN job_search = 'Data Scientist'
+			AND job_description ILIKE '%data scientist%' THEN 1
+			ELSE 0
+		END AS is_verified,
+		*
+	FROM
+		dwh.split_skills
         )
-
-        SELECT
-        *
-        FROM
-        verification_cte
-        WHERE
-        is_verified = 1
-        );
+	SELECT
+		*
+	FROM
+		verification_cte
+	WHERE
+		is_verified = 1
+	)
+	ON CONFLICT (job_id, skill) DO NOTHING;;
                 """
     )
 
