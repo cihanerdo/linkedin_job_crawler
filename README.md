@@ -1,4 +1,4 @@
-# README
+# LINKEDIN JOB CRAWLER
 
 ![Untitled](README/Untitled.gif)
 
