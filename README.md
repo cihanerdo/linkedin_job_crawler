@@ -30,7 +30,7 @@ Veritabanı bağlantısı için gerekli bilgileri .env dosyasına girin.
 
 `pip install -r requirements.txt`
 
- 
+ ## Nasıl Kullanılır
 
 **Full run modunda çalıştırmak için:**
 
