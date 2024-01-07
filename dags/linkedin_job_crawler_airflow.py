@@ -9,13 +9,13 @@ from airflow.utils.task_group import TaskGroup
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.models import Variable
 import nltk
-
 nltk.download('stopwords')
 
 default_args = {
     'retries': 3,
     'retry_delay': timedelta(minutes=1)
 }
+
 
 job_titles = ["Data Analyst", "Data Engineer", "Data Scientist"]
 locations = {
@@ -28,6 +28,7 @@ locations = {
 }
 
 
+
 def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
     location = location.lower()
     logger.debug('job_details_to_csv function started.')
@@ -35,6 +36,7 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
     all_job_details_df = pd.DataFrame()
     counter = 0
 
+    
     today = datetime.today().strftime("%d-%m-%y")
     job_title_lower = job_title.lower()
     location_lower = location.lower()
@@ -46,6 +48,7 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
         job_ids_dataframe = pd.read_csv(file_path)
         job_ids_dataframe = job_ids_dataframe.head(5)
 
+    
     for _, row in tqdm(job_ids_dataframe.iterrows(), total=len(job_ids_dataframe)):
         job_id = row["job_id"]
 
@@ -63,9 +66,10 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
 
         counter += 1
 
+        
         if counter == 25 or counter == len(job_ids_dataframe):
             try:
-
+                
                 all_job_details_df = skills_catcher(all_job_details_df)
 
                 os.makedirs("dags/outputs/job_details/", exist_ok=True)
@@ -75,7 +79,7 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
                 location = location.lower()
                 file_name = f'{job_title}_{location}_job_details_data_{today}'
                 file_path = f"dags/outputs/job_details/{file_name}.csv"
-
+                
                 all_job_details_df.to_csv(file_path, index=False)
                 logger.debug(f'CSV file creation completed successfully.: {file_name}')
 
@@ -85,7 +89,6 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
                 counter = 0
 
     return file_path
-
 
 def fetch_job_ids_airflow(job_title, location, DEBUG, **kwargs):
     """
@@ -155,6 +158,7 @@ def fetch_job_ids_airflow(job_title, location, DEBUG, **kwargs):
         file_name = f'{job_title}_{location}_job_ids_data_{today}'
         file_path = f"dags/outputs/job_ids/{file_name}.csv"
 
+
         all_job_ids_dataframe.to_csv(file_path, index=False)
         crawled_job_id_count = len(all_job_ids_dataframe)
         total_job_count = result_json["data"]["paging"]["total"]
@@ -193,7 +197,6 @@ def fetch_job_ids_airflow(job_title, location, DEBUG, **kwargs):
         # Hata günlüğüne hata mesajı ve ayrıntıları ekle
         logger.error("An error occurred while fetch_job_ids", str(e))
 
-
 def upload_to_gcs(data_folder, **kwargs):
     bucket_name = 'linkedin-job'
     gcs_conn_id = 'google_cloud_connection'
@@ -207,13 +210,12 @@ def upload_to_gcs(data_folder, **kwargs):
     # Upload files from job_details folder
     upload_files_to_gcs(job_details_folder, 'Job_Details', bucket_name, gcs_conn_id, kwargs)
 
-
 def upload_files_to_gcs(local_folder, gcs_folder, bucket_name, gcs_conn_id, kwargs):
     csv_files = [file for file in os.listdir(local_folder) if file.endswith('.csv')]
 
     for csv_file in csv_files:
         local_file_path = os.path.join(local_folder, csv_file)
-
+        
         # Dosya adındaki uygun olmayan karakterleri temizle
         sanitized_csv_file = ''.join(c if c.isalnum() or c in ['-', '.', '_'] else '' for c in csv_file)
         gcs_file_path = os.path.join(gcs_folder, sanitized_csv_file)
@@ -225,12 +227,11 @@ def upload_files_to_gcs(local_folder, gcs_folder, bucket_name, gcs_conn_id, kwar
             bucket=bucket_name,
             gcp_conn_id=gcs_conn_id,
         )
-
+        
         try:
             upload_task.execute(context=kwargs)
         except Exception as e:
             print(f"Hata oluştu: {str(e)}")
-
 
 def check_csv_files_existence(data_folder, **kwargs):
     try:
@@ -248,11 +249,9 @@ def check_csv_files_existence(data_folder, **kwargs):
         print(f"An error occurred while checking CSV files existence: {str(e)}")
         return ['no_op']
 
-
 def delete_csv_files(data_folder, **kwargs):
     try:
-        subfolders = [subfolder for subfolder in os.listdir(data_folder) if
-                      os.path.isdir(os.path.join(data_folder, subfolder))]
+        subfolders = [subfolder for subfolder in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, subfolder))]
 
         for subfolder in subfolders:
             folder_path = os.path.join(data_folder, subfolder)
@@ -266,24 +265,26 @@ def delete_csv_files(data_folder, **kwargs):
     except Exception as e:
         print(f"An error occurred while deleting CSV files: {str(e)}")
 
-
-def upload_csv_to_postgres(csv_file_path, table_name, **kwargs):
+def upload_csv_to_postgres(csv_file_path, table_name,  **kwargs):
     DB_USERNAME = Variable.get("DB_USERNAME", default_var=None)
     DB_PASSWORD = Variable.get("DB_PASSWORD", default_var=None)
     DB_HOST_IP = Variable.get("DB_HOST_IP", default_var=None)
     DB_NAME = Variable.get("DB_NAME", default_var=None)
     engine = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST_IP}:5432/{DB_NAME}"
     df = pd.read_csv(csv_file_path)
-    df.to_sql(name=table_name, schema="stg", con=engine, if_exists='append', index=False)
+    df.to_sql(name=table_name, schema="stg" ,con=engine, if_exists='append', index=False)
+
+
 
 
 with DAG(
-        default_args=default_args,
-        start_date=datetime(2023, 1, 18),
-        catchup=False,
-        dag_id="linkedin_job_crawler",
-        schedule_interval="@daily",
+    default_args=default_args,
+    start_date=datetime(2023, 1, 18),
+    catchup=False,
+    dag_id="linkedin_job_crawler",
+    schedule_interval="@daily",
 ) as dag:
+
     start_task = DummyOperator(task_id='start_task')
 
     with TaskGroup("fetch_job_data_task", dag=dag) as fetch_job_data_task:
@@ -307,33 +308,39 @@ with DAG(
             previous_task >> fetch_job_ids_task
             previous_task = fetch_job_ids_task
 
+
     dum_task = DummyOperator(task_id="dum_task")
 
     with TaskGroup("csv_to_sql_job_ids_task", dag=dag) as csv_to_sql_job_ids_task:
 
-        pre_task = dum_task
+        pre_task = dum_task 
 
         for job_title, location in product(job_titles, locations.keys()):
+
             csv_to_sql_job_ids_task_id = f"csv_to_sql_job_ids_task_{job_title.replace(' ', '_')}_{location.replace(' ', '_')}"
             csv_to_sql_job_ids_task = PythonOperator(
                 task_id=csv_to_sql_job_ids_task_id,
                 python_callable=upload_csv_to_postgres,
                 op_kwargs={
-                    "csv_file_path": f'dags/outputs/job_ids/{job_title.lower()}_{location.lower()}_job_ids_data_{datetime.today().strftime("%d-%m-%y")}.csv',
-                    "table_name": "job_ids_airflow",
-                    "conn_id": "postgres_conn"
+                    "csv_file_path":f'dags/outputs/job_ids/{job_title.lower()}_{location.lower()}_job_ids_data_{datetime.today().strftime("%d-%m-%y")}.csv',
+                    "table_name":"job_ids_airflow",
+                    "conn_id":"postgres_conn"
                 }
             )
             csv_to_sql_job_ids_task.set_upstream(pre_task)
             pre_task = csv_to_sql_job_ids_task
 
+
+
     dummy_task = DummyOperator(task_id='dummy_task')
+
 
     with TaskGroup("generate_job_details_task", dag=dag) as generate_job_details_task:
 
         previous_task = dummy_task
 
         for job_title, location in product(job_titles, locations.keys()):
+
             generate_job_details_csv_task_id = f"generate_job_details_csv_task_{job_title.replace(' ', '_')}_{location.replace(' ', '_')}"
             generate_job_details_csv_task = PythonOperator(
                 task_id=generate_job_details_csv_task_id,
@@ -352,20 +359,22 @@ with DAG(
 
     with TaskGroup("csv_to_sql_job_details_task", dag=dag) as csv_to_sql_job_details_task:
 
-        previo_task = pre_task
+        previo_task = pre_task 
 
         for job_title, location in product(job_titles, locations.keys()):
+
             csv_to_sql_job_details_task_id = f"csv_to_sql_job_details_task_{job_title.replace(' ', '_')}_{location.replace(' ', '_')}"
             csv_to_sql_job_details_task = PythonOperator(
                 task_id=csv_to_sql_job_details_task_id,
                 python_callable=upload_csv_to_postgres,
                 op_kwargs={
-                    "csv_file_path": f'dags/outputs/job_details/{job_title.lower()}_{location.lower()}_job_details_data_{datetime.today().strftime("%d-%m-%y")}.csv',
+                    "csv_file_path":f'dags/outputs/job_details/{job_title.lower()}_{location.lower()}_job_details_data_{datetime.today().strftime("%d-%m-%y")}.csv',
                     "table_name": "job_details_airflow"
                 }
             )
             csv_to_sql_job_details_task.set_upstream(previo_task)
             previo_task = csv_to_sql_job_details_task
+
 
     check_csv_files_task = BranchPythonOperator(
         task_id="check_csv_files_task",
@@ -388,10 +397,11 @@ with DAG(
         provide_context=True,
     )
 
+
     create_dwh_tables_task = PostgresOperator(
-        task_id="create_dwh_tables_task",
-        postgres_conn_id="postgres_conn",
-        sql="""
+        task_id = "create_dwh_tables_task",
+        postgres_conn_id = "postgres_conn",
+        sql = """
         CREATE TABLE IF NOT EXISTS dwh.job_title(
             job_title_id serial PRIMARY KEY,
             job_title varchar);
@@ -465,14 +475,14 @@ with DAG(
             is_remote bool,
             skills varchar,
             job_description TEXT);
-
+        
         """
     )
 
     insert_values_task = PostgresOperator(
-        task_id="insert_values_task",
-        postgres_conn_id="postgres_conn",
-        sql="""
+        task_id = "insert_values_task",
+        postgres_conn_id = "postgres_conn",
+        sql = """
             INSERT
         INTO
         dwh.job_title(job_title) 
@@ -549,102 +559,6 @@ with DAG(
     FROM
         stg.job_details_airflow;
 
-            INSERT
-        INTO
-        dwh.jobs(job_id,
-        job_title_id,
-        company_id,
-        country_id,
-        location_id,
-        employment_status_id,
-        experience_level_id,
-        industries_id,
-        skills_id,
-        job_functions_id,
-        listed_date,
-        load_date,
-        job_apply_count,
-        VIEWS,
-        is_remote,
-        job_description)
-    WITH RankedJobs AS (
-        SELECT
-            j.job_id,
-            j.job_title,
-            j.company_name,
-            j.location,
-            j.job_title_search_term,
-            j.location_search_term,
-            j.load_date,
-            jd.job_description,
-            jd.job_apply_count,
-            jd.views,
-            jd.expire_date,
-            jd.is_remote,
-            ROW_NUMBER() OVER (PARTITION BY j.job_id
-        ORDER BY
-            jd.views DESC,
-            jd.job_apply_count DESC) AS RowNum
-        FROM
-            stg.job_ids_airflow j
-        INNER JOIN
-            stg.job_details_airflow jd ON
-            j.job_id = jd.job_id
-    )
-    SELECT
-        CAST(j.job_id AS bigint),
-        jt.job_title_id,
-        c.company_id,
-        co.country_id,
-        l.location_id,
-        es.employment_status_id,
-        el.experience_level_id,
-        ind.industries_id,
-        sk.skills_id,
-        jf.job_functions_id,
-        CAST(jd.listed_date AS timestamp),
-        CAST(jd.load_date AS timestamp),
-        CAST(jd.job_apply_count AS int),
-        CAST(jd.views AS int),
-        CAST(jd.is_remote AS bool),
-        CAST(jd.job_description AS TEXT)
-    FROM
-        RankedJobs j
-    INNER JOIN
-        stg.job_details_airflow jd ON
-        jd.job_id = j.job_id
-    INNER JOIN
-        dwh.job_title jt ON
-        j.job_title = jt.job_title
-    INNER JOIN
-        dwh.company c ON
-        j.company_name = c.company_name
-    INNER JOIN
-        dwh.country co ON
-        j.location_search_term = co.country
-    INNER JOIN
-        dwh.location l ON
-        j.location = l.job_location
-    INNER JOIN
-        dwh.employment_status es ON
-        jd.employment_status = es.employment_status
-    INNER JOIN
-        dwh.experience_level el ON
-        jd.experience_level = el.experience_level
-    INNER JOIN
-        dwh.industries ind ON
-        jd.industries = ind.industries
-    INNER JOIN
-        dwh.skills sk ON
-        jd.skills = sk.skills
-    INNER JOIN
-        dwh.job_functions jf ON
-        jd.job_functions = jf.job_functions
-    WHERE
-        j.RowNum = 1
-    ON
-        CONFLICT (job_id) DO NOTHING;
-
             INSERT INTO dwh.jobs_(job_id, job_title, job_search, company_name, 
                         country, location, employment_status, 
                         experience_level, industries, job_functions,
@@ -674,7 +588,7 @@ with DAG(
             stg.job_ids_airflow j
         INNER JOIN
             stg.job_details_airflow jd ON j.job_id=jd.job_id
-
+        
     )
     SELECT 
         cast(j.job_id AS bigint),
@@ -704,7 +618,7 @@ with DAG(
 
             INSERT
             INTO
-            split_skills(
+            dwh.split_skills(
             SELECT
                 job_id,
                 job_title,
@@ -724,32 +638,38 @@ with DAG(
                 job_description,
                 TRIM(UNNEST(string_to_array(skills, ','))) AS skill
             FROM
-                jobs_
+                dwh.jobs_
         );
 
-                INSERT INTO dwh.verified_jobs(
+                INSERT
+	INTO
+	dwh.verified_jobs(
         WITH verification_cte AS (
-        SELECT
-            CASE
-            WHEN job_search = 'Data Engineer' AND job_description ILIKE '%data engineer%' THEN 1
-            WHEN job_search = 'Data Analyst' AND job_description ILIKE '%data analyst%' THEN 1
-            WHEN job_search = 'Data Scientist' AND job_description ILIKE '%data scientist%' THEN 1
-            ELSE 0
-            END AS is_verified,
-            *
-        FROM
-            dwh.split_skills
+	SELECT
+		CASE
+			WHEN job_search = 'Data Engineer'
+			AND job_description ILIKE '%data engineer%' THEN 1
+			WHEN job_search = 'Data Analyst'
+			AND job_description ILIKE '%data analyst%' THEN 1
+			WHEN job_search = 'Data Scientist'
+			AND job_description ILIKE '%data scientist%' THEN 1
+			ELSE 0
+		END AS is_verified,
+		*
+	FROM
+		dwh.split_skills
         )
-
-        SELECT
-        *
-        FROM
-        verification_cte
-        WHERE
-        is_verified = 1
-        );
+	SELECT
+		*
+	FROM
+		verification_cte
+	WHERE
+		is_verified = 1
+	)
+	ON CONFLICT (job_id, skill) DO NOTHING;;
                 """
     )
 
+
     start_task >> fetch_job_data_task >> dum_task >> csv_to_sql_job_ids_task >> dummy_task >> generate_job_details_task >> pre_task
-    pre_task >> csv_to_sql_job_details_task >> create_dwh_tables_task >> insert_values_task >> check_csv_files_task >> upload_to_gcs_task >> delete_csv_files_task
+    pre_task >> csv_to_sql_job_details_task >> create_dwh_tables_task >> insert_values_task >>check_csv_files_task >> upload_to_gcs_task >> delete_csv_files_task
