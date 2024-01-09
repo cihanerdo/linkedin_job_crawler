@@ -80,7 +80,7 @@ Kurulum bittikten sonra http://localhost:8080 adresinden Airflow UI’ya bağlan
 
 ## Proje Örneği
 
-`python [main.py](http://main.py) -j “data analyst” -l “turkey” -d`
+`python main.py -j “data analyst” -l “turkey” -d`
 
 **Türkiye’de açılmış Data Analyst ilanları.**
 
