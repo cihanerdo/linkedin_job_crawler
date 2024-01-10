@@ -8,3 +8,6 @@ networkx
 scipy
 spacy
 stop-words
+python-dotenv
+sqlalchemy
+psycopg2
