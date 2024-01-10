@@ -30,7 +30,14 @@ Veritabanı bağlantısı için gerekli bilgileri .env dosyasına girin.
 
 `pip install -r requirements.txt`
 
- ## Nasıl Kullanılır
+## Install stopwords
+
+Öncesinde hiç nltk kütüphanesi ve stopwords kullanmadıysanız aşağıdaki adımları uygulayın.
+
+* `import nltk`
+* `nltk.download("stopwords")`
+
+## Nasıl Kullanılır
 
 **Full run modunda çalıştırmak için:**
 
