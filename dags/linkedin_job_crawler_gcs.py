@@ -8,8 +8,8 @@ from itertools import product
 from airflow.utils.task_group import TaskGroup
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.models import Variable
-import nltk
-nltk.download('stopwords')
+
+
 
 default_args = {
     'retries': 3,
@@ -69,19 +69,35 @@ def generate_job_details_csv_airflow(job_title, location, DEBUG, **kwargs):
         
         if counter == 25 or counter == len(job_ids_dataframe):
             try:
-                
-                all_job_details_df = skills_catcher(all_job_details_df)
+                if len(all_job_details_df) == 250:
+                    all_job_details_df = skills_catcher_db(all_job_details_df)
+                    os.makedirs("dags/outputs/job_details/", exist_ok=True)
+                    today = datetime.today().strftime("%d-%m-%y")
 
-                os.makedirs("dags/outputs/job_details/", exist_ok=True)
-                today = datetime.today().strftime("%d-%m-%y")
-
-                job_title = job_title.lower()
-                location = location.lower()
-                file_name = f'{job_title}_{location}_job_details_data_{today}'
-                file_path = f"dags/outputs/job_details/{file_name}.csv"
+                    job_title = job_title.lower()
+                    location = location.lower()
+                    file_name = f'{job_title}_{location}_job_details_data_{today}'
+                    file_path = f"dags/outputs/job_details/{file_name}.csv"
+                    
+                    all_job_details_df.to_csv(file_path, index=False)
+                    logger.debug(f'CSV file creation completed successfully.: {file_name}')
                 
-                all_job_details_df.to_csv(file_path, index=False)
-                logger.debug(f'CSV file creation completed successfully.: {file_name}')
+                
+                
+                else:
+                
+                    all_job_details_df = skills_catcher(all_job_details_df)
+
+                    os.makedirs("dags/outputs/job_details/", exist_ok=True)
+                    today = datetime.today().strftime("%d-%m-%y")
+
+                    job_title = job_title.lower()
+                    location = location.lower()
+                    file_name = f'{job_title}_{location}_job_details_data_{today}'
+                    file_path = f"dags/outputs/job_details/{file_name}.csv"
+                    
+                    all_job_details_df.to_csv(file_path, index=False)
+                    logger.debug(f'CSV file creation completed successfully.: {file_name}')
 
             except Exception as e:
                 logger.error(f'An error occurred during creating CSV file: {str(e)}')
@@ -281,11 +297,12 @@ with DAG(
     default_args=default_args,
     start_date=datetime(2023, 1, 18),
     catchup=False,
-    dag_id="linkedin_job_crawler",
+    dag_id="linkedin_job_crawler_gcs",
     schedule_interval="@daily",
 ) as dag:
 
     start_task = DummyOperator(task_id='start_task')
+
 
     with TaskGroup("fetch_job_data_task", dag=dag) as fetch_job_data_task:
 
