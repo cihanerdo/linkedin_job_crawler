@@ -2,21 +2,24 @@
 
 ![Untitled](README/Untitled.gif)
 
-Repoyu kaydetmek için:
+## **Repository Cloning**
+To clone the repository, use the following command:
 
 `git clone https://github.com/cihanerdo/linkedin_job_crawler.git`
 
-## Cookie Nasıl Alınır?
+## Obtaining Cookies
 
-- linkedin.com'da oturum açın
-- [Get cookies.txt LOCALLY](https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc/related) eklentisini indirin.
-- Çerezi indirin ve configs klasörüne kaydedin. (indirdiğiniz dosyaya `cookie.txt` ismini verin) 
-
+1. **Sign in to LinkedIn:**
+    - Visit linkedin.com and log in to your account.
+2. **Download Cookies Extension:**
+    - Download the "Get cookies.txt LOCALLY" extension.
+3. **Save Cookie File:**
+    - Save the downloaded cookie file to the **`configs`** folder, naming it **`cookie.txt`**.
 ![Untitled](README/Untitled.png)
 
-## Veritabanı Bağlantısı
+## Database Connection
 
-Veritabanı bağlantısı için gerekli bilgileri .env dosyasına girin.
+Enter the necessary database information in the .env file:
 
 `DB_USERNAME="your_username"`
 
@@ -26,34 +29,39 @@ Veritabanı bağlantısı için gerekli bilgileri .env dosyasına girin.
 
 `DB_NAME="your_database_name"`
 
-## Install Requirements.txt 
+## Installing Requirements 
+
+Install the required dependencies using the following command:
 
 `pip install -r requirements.txt`
 
-## Install stopwords
+## Installing Stopwords
 
-Öncesinde hiç nltk kütüphanesi ve stopwords kullanmadıysanız aşağıdaki adımları uygulayın.
+If you haven't used the nltk library and stopwords before, execute the following steps:
 
 * `import nltk`
 * `nltk.download("stopwords")`
 
-## Nasıl Kullanılır
+## How to Use
 
-**Full run modunda çalıştırmak için:**
+**Full Run Mode**
+To run in full mode, use:
 
 `python main.py -j "job_title" -l "location"`
 
-**Debug modunda çalıştırmak için:**
+### **Debug Mode**
+To run in debug mode, use:
 
  `python main.py -j "job_title" -l "location" -d`
 
-## Destekleklenen Ülkeler
+## Supported Countries
 
-Desteklenen ülke ve geoid’ler configs/[conf.py](http://conf.py) dosyasında belirtilmiştir. 
 
-Farklı ülke eklemek için ülke ismi ve geoid bilgisini conf.py içerisinde geoid_dict’e ekleyebilirsiniz.  
+The supported countries and their geoid configurations are specified in the conf.py file.
 
-[LinkedIn Jobs](https://www.linkedin.com/jobs/) sekmesinde istenilen ülke aranarak geoid bilgisine aşağıdaki şekilde ulaşılabilir.
+If you want to add a different country, you can add its name and geoid information to the geoid_dict section in the conf.py file.
+
+To find the geoid information for the desired country, you can search for it on the [LinkedIn Jobs](https://www.linkedin.com/jobs/) tab.
 
 **Sample URL:** `https://www.linkedin.com/jobs/search/ currentJobId=3797992840&**geoId=101282230**&location=Germany`
 
@@ -69,9 +77,9 @@ Farklı ülke eklemek için ülke ismi ve geoid bilgisini conf.py içerisinde ge
 | United Kingdom | 101165590 |
 | ... | … |
 
-## Airflow
+## Airflow Setup
 
-Airflow kurulumu için aşağıdaki adımları uygulayın.
+Follow the steps below for Airflow installation:
 
 `mkdir -p ./dags ./logs ./plugins ./config`
 
@@ -79,44 +87,44 @@ Airflow kurulumu için aşağıdaki adımları uygulayın.
 
 `docker compose up —build -d`
 
-Kurulum bittikten sonra http://localhost:8080 adresinden Airflow UI’ya bağlantı sağlayabilirsiniz.
+Access the Airflow UI at http://localhost:8080 after the installation is complete.
 
 ![Untitled](README/Untitled%201.png)
 
 
 
-## Proje Örneği
+## Project Example
 
 `python main.py -j “data analyst” -l “turkey” -d`
 
-**Türkiye’de açılmış Data Analyst ilanları.**
+**Data Analyst jobs in Turkey.**
 
 ![Untitled](README/Untitled%202.png)
 
-**Türkiye’de açılmış Data Analyst ilanlarının detayları**
+**Details of Data Analyst jobs in Turkey**
 
 ![Untitled](README/Untitled%203.png)
 
 
 
-**İş ilanları hakkında genel bilgiler** 
+**General information about jobs** 
 
 ![Untitled](README/Untitled%204.png)
 
-**İş İlanlarının detaylı tablosu**
+**Detailed table of jobs**
 
 ![Untitled](README/Untitled%205.png)
 
 ## Superset
 
-****************Data Engineer ilanlarının sonucu****************
+****************Results of Data Engineer jobs****************
 
 ![Untitled](README/Untitled%206.png)
 
-**************************************************************************************Amerika’da açılmış Data Engineer ilanlarının sonucu**************************************************************************************
+**************************************************************************************Results for Data Engineer jobs in United States**************************************************************************************
 
 ![Untitled](README/Untitled%207.png)
 
-******************************************************************************Entry Level Data Scientist İlanları******************************************************************************
+******************************************************************************Entry Level Data Scientist Jobs******************************************************************************
 
 ![Untitled](README/Untitled%208.png)
